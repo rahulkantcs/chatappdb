@@ -17,7 +17,9 @@
         const data = await res.json()
         data.user.map(mappedUser => {
           if (mappedUser.username !== "admin") {
-            let li = `<li> <b>Username</b> => ${mappedUser.username} <br> <b>Role</b> => ${mappedUser.role} </li>`
+            let li = `<li> <a href='/chat/${mappedUser.id}'><b>Username</b> => ${mappedUser.username} <br> <b>Role</b> => ${mappedUser.role} 
+                ${mappedUser.isOnline ? " Online" : " Offline"}
+              </a></li>`
             ul.innerHTML += li
           } else {
             return null

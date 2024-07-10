@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
-const { getUser } = require('../db/index')
+const { getUser, createMessage, getChat } = require('../db/index')
 
 
 const maxAge = 3 * 60 * 60;
@@ -46,8 +46,9 @@ exports.renderChatWithData = async (req, res) => {
                 return res.status(401).json({ message: "Not authorized" })
             } else {
                 const currUser = await getUser(decodedToken.id)
+                const chats = await getChat({fromId: currUser.id, toId: otherUser.id})
                 otherUser.isOnline = !!UserStore.getOnlineUser(otherUser.id)
-                res.render("chat", { currUser, otherUser })
+                res.render("chat", { currUser, otherUser, chats })
             }
         })
     } else {
@@ -77,6 +78,7 @@ exports.creatSocket = (app) => {
         socket.on("private message", (msg) => {
             const anotherSocketId = UserStore.getOnlineUser(msg.to)
             socket.to(anotherSocketId).emit("private message", { ...msg, from: socket.data });
+            createMessage({fromId: socket?.data?.id, toId: msg.to, message: msg.message})
         });
         socket.on('disconnect', () => {
             let disconnected

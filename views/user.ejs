@@ -1,30 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User page</title>
-  </head>
-  <body>
-    <a href="/logout">Logout</a>
-    <h1>Users</h1>
-    <ul></ul>
-    <script>
-      const ul = document.querySelector("ul")
-      const getUsers = async () => {
-        const res = await fetch("/api/auth/getUsers")
-        const data = await res.json()
-        data.user.map(mappedUser => {
-          if (mappedUser.username !== "admin") {
-            let li = `<li> <b>Username</b> => ${mappedUser.username} <br> <b>Role</b> => ${mappedUser.role} </li>`
-            ul.innerHTML += li
-          } else {
-            return null
-          }
-        })
-      }
-      getUsers()
-    </script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #555;
+    }
+
+    #head {
+      background: rgba(0, 0, 0, 0.15);
+      color: #fff;
+      padding: 24px;
+      padding-top: 12px;
+      font-size: 24px;
+      padding-bottom: 12px;
+    }
+
+    .title {
+      display: inline-block;
+    }
+
+    .logout {
+      color: #ccc;
+      float: right;
+      font-size: 18px;
+      text-decoration: none;
+      line-height: 80px;
+      display: inline-block;
+    }
+
+    ul {
+      padding: 0;
+      list-style-type: none;
+    }
+
+    li {
+      margin: 16px;
+      background: rgba(0, 0, 0, 0.15);
+      list-style-type: none;
+      display: flex;
+    }
+
+    li>a {
+      color: #ccc;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+      padding: 8px;
+    }
+
+    .name {
+      font-size: 16px;
+    }
+
+    .status {
+      padding-top: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="head">
+    <p class="title">Contacts</p> <a class="logout" href="/logout">Logout</a>
+  </div>
+  <ul></ul>
+  <script>
+    const ul = document.querySelector("ul")
+    const getUsers = async () => {
+      const res = await fetch("/api/auth/getUsers")
+      const data = await res.json()
+      data.user.map(mappedUser => {
+        if (mappedUser.username !== "admin") {
+          let li = `<li> <a href='/chat/${mappedUser.id}'><p class="name"> ${mappedUser.username}</p>
+                <p class="status"> ${mappedUser.isOnline ? " Online" : " Offline"}</p></a></li>`
+          ul.innerHTML += li
+        } else {
+          return null
+        }
+      })
+    }
+    getUsers()
+  </script>
+</body>
+
 </html>

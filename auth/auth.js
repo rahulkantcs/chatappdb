@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require("../model/user");
+const { UserStore } = require("../socket")
 
 const maxAge = 3 * 60 * 60;
 const jwtSecret = '4715aed3c946f7b0a38e6b534a9583628d84e96d10fbc04700770d572af3dce43625dd';
@@ -189,15 +190,30 @@ exports.userAuth = (req, res, next) => {
             .json({ message: "Not authorized, token not available" })
     }
 }
-exports.getUsers = async (req, res, next) => {
+exports.getUsers = async (req, res) => {
+    const token = req.cookies.jwt
+    let id
+
+    jwt.verify(token, jwtSecret, (err, decodedToken) => {
+        if (err) {
+            return res.status(401).json({ message: "Not authorized" })
+        } else {
+            id = decodedToken.id 
+        }
+    })
     await User.find({})
         .then(users => {
-            const userFunction = users.map(user => {
+            const userFunction = users.reduce((allUsers, user) => {
+                if(user.id == id) return allUsers
                 const container = {}
+                container.isOnline = false
                 container.username = user.username
                 container.role = user.role
-                return container
-            })
+                container.id = user.id
+                container.isOnline = !!UserStore.getOnlineUser(user.id)
+                allUsers.push(container)
+                return allUsers
+            }, [])
             res.status(200).json({ user: userFunction })
         })
         .catch(err =>
